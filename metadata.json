@@ -1,0 +1,6 @@
+{
+  "name": "Screw Puzzle: 50 Levels",
+  "description": "An unscrew puzzle game featuring 50 mechanical levels across 10 vibrant themes, increasing difficulty, time limits, unlockable tools, and physics-based plank puzzles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
