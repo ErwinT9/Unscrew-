@@ -3,6 +3,9 @@ package com.example.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.model.ToolType
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class GamePreferences(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("unscrew_game_prefs", Context.MODE_PRIVATE)
@@ -14,7 +17,7 @@ class GamePreferences(context: Context) {
     fun setUnlockedLevel(level: Int) {
         val current = getUnlockedLevel()
         if (level > current) {
-            prefs.edit().putInt("unlocked_level", level.coerceIn(1, 50)).apply()
+            prefs.edit().putInt("unlocked_level", level.coerceIn(1, 100)).apply()
         }
     }
 
@@ -31,14 +34,14 @@ class GamePreferences(context: Context) {
 
     fun getTotalStars(): Int {
         var total = 0
-        for (i in 1..50) {
+        for (i in 1..100) {
             total += getStarsForLevel(i)
         }
         return total
     }
 
     fun getCoins(): Int {
-        return prefs.getInt("coins_balance", 200) // Start with 200 bonus coins
+        return prefs.getInt("coins_balance", 0) // Starts at 0 for new installs
     }
 
     fun addCoins(amount: Int) {
@@ -56,8 +59,9 @@ class GamePreferences(context: Context) {
     }
 
     fun getToolCount(tool: ToolType): Int {
-        // Give 2 free starter counts for each unlocked tool
-        return prefs.getInt("tool_count_${tool.name}", 2)
+        // Starting tool count: 1 free undo wrench, 0 for specialty armory tools
+        val defaultCount = if (tool == ToolType.UNDO) 1 else 0
+        return prefs.getInt("tool_count_${tool.name}", defaultCount)
     }
 
     fun addTool(tool: ToolType, count: Int = 1) {
@@ -72,6 +76,19 @@ class GamePreferences(context: Context) {
             return true
         }
         return false
+    }
+
+    private fun getTodayDateString(): String {
+        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+    }
+
+    fun canClaimDaily(): Boolean {
+        val lastClaimed = prefs.getString("last_daily_claim_date", "") ?: ""
+        return lastClaimed != getTodayDateString()
+    }
+
+    fun markDailyClaimed() {
+        prefs.edit().putString("last_daily_claim_date", getTodayDateString()).apply()
     }
 
     fun isSoundEnabled(): Boolean {

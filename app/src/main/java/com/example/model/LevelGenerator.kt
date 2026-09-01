@@ -7,7 +7,7 @@ import kotlin.math.PI
 object LevelGenerator {
 
     fun getBiomeForLevel(level: Int): BiomeTheme {
-        return when ((level - 1) / 5) {
+        return when (((level - 1) / 10).coerceIn(0, 9)) {
             0 -> BiomeTheme.WORKSHOP
             1 -> BiomeTheme.ARABIAN_PALACE
             2 -> BiomeTheme.STEAMPUNK_FORGE
@@ -22,26 +22,28 @@ object LevelGenerator {
     }
 
     fun getLevel(levelNumber: Int): LevelData {
-        val clampedLevel = levelNumber.coerceIn(1, 50)
+        val clampedLevel = levelNumber.coerceIn(1, 100)
         val biome = getBiomeForLevel(clampedLevel)
         
         // Base parameters scaling with level
         val baseTime = when {
-            clampedLevel <= 5 -> 100
-            clampedLevel <= 15 -> 90
-            clampedLevel <= 25 -> 80
-            clampedLevel <= 35 -> 75
-            clampedLevel <= 45 -> 70
+            clampedLevel <= 10 -> 100
+            clampedLevel <= 25 -> 90
+            clampedLevel <= 45 -> 80
+            clampedLevel <= 65 -> 75
+            clampedLevel <= 85 -> 70
             else -> 65
         }
-        val timeLimit = baseTime + (if (clampedLevel % 5 == 0) 15 else 0) // Boss/milestone levels get slightly more time
+        val timeLimit = baseTime + (if (clampedLevel % 10 == 0 || clampedLevel % 5 == 0) 15 else 0)
 
         val colorsPool = when {
-            clampedLevel <= 4 -> listOf(ScrewColor.RED, ScrewColor.BLUE)
-            clampedLevel <= 10 -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.YELLOW)
-            clampedLevel <= 20 -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.GREEN, ScrewColor.YELLOW)
-            clampedLevel <= 35 -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.GREEN, ScrewColor.YELLOW, ScrewColor.PURPLE)
-            else -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.GREEN, ScrewColor.YELLOW, ScrewColor.PURPLE, ScrewColor.ORANGE, ScrewColor.CYAN)
+            clampedLevel <= 5 -> listOf(ScrewColor.RED, ScrewColor.BLUE)
+            clampedLevel <= 12 -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.YELLOW)
+            clampedLevel <= 25 -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.GREEN, ScrewColor.YELLOW)
+            clampedLevel <= 45 -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.GREEN, ScrewColor.YELLOW, ScrewColor.PURPLE)
+            clampedLevel <= 70 -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.GREEN, ScrewColor.YELLOW, ScrewColor.PURPLE, ScrewColor.ORANGE)
+            clampedLevel <= 85 -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.GREEN, ScrewColor.YELLOW, ScrewColor.PURPLE, ScrewColor.ORANGE, ScrewColor.PINK)
+            else -> listOf(ScrewColor.RED, ScrewColor.BLUE, ScrewColor.GREEN, ScrewColor.YELLOW, ScrewColor.PURPLE, ScrewColor.ORANGE, ScrewColor.PINK, ScrewColor.CYAN)
         }
 
         return generateLayoutForLevel(clampedLevel, biome, timeLimit, colorsPool)
@@ -56,11 +58,11 @@ object LevelGenerator {
         val holes = mutableListOf<Hole>()
         val screws = mutableListOf<Screw>()
         val planks = mutableListOf<Plank>()
-        val levelIndexInBiome = (level - 1) % 5 // 0..4
-        val biomeIndex = (level - 1) / 5
+        val levelIndexInBiome = (level - 1) % 10 // 0..9
+        val biomeIndex = ((level - 1) / 10).coerceIn(0, 9)
 
         // Free spare holes count
-        val freeHolesCount = if (level <= 5) 3 else if (level <= 20) 4 else if (level <= 35) 4 else 5
+        val freeHolesCount = if (level <= 10) 3 else if (level <= 40) 4 else 5
         // Add reserved spare holes along the top shelf of the board canvas
         for (i in 0 until freeHolesCount) {
             val hx = 60f + i * (280f / (freeHolesCount - 1).coerceAtLeast(1))
@@ -105,16 +107,36 @@ object LevelGenerator {
         }
 
         val titles = listOf(
+            // Workshop (1-10)
             "Introductory Joint", "Cross Timber", "Tripod Scaffold", "Dual Trusses", "Workshop Lattice",
+            "Master Dovetail", "Heavy Worktable", "Interlocking Beams", "Cantilevered Crane", "Master Carpenter Hall",
+            // Persian Palace (11-20)
             "Arabesque Ring", "Jeweled Diamond", "Palace Sunburst", "Sultan's Mandala", "Grand Mosque Dome",
+            "Sapphire Rosette", "Silk Weaver Wheel", "Imperial Astrolabe", "Ruby Crown Seal", "Grand Vizier Palace",
+            // Steampunk Forge (21-30)
             "Twin Cogs", "Scissor Linkage", "Piston Matrix", "Interlocking Gears", "Chronos Dial",
+            "Steam Dynamo", "Clockwork Engine", "Pressure Valve Grid", "Flywheel Escapement", "Great Automaton Core",
+            // Zen Garden (31-40)
             "Bamboo Raft", "Torii Portal", "Lotus Petals", "Stepping Stones", "Yin-Yang Harmony",
+            "Bonsai Framework", "Lantern Pagoda", "Whispering Pines", "Cranes of Peace", "Zen Garden Sanctuary",
+            // Cyber Neon (41-50)
             "Laser Diagonal", "Silicon Chip", "Hexagon Nexus", "Quantum Scaffolding", "Cyber Core",
+            "Neon Hypergrid", "Memory Circuit", "Mainframe Matrix", "Firewall Prism", "AI Neural Singularity",
+            // Alchemy Lab (51-60)
             "Potion Flask", "Alembic Spiral", "Philosopher's Seal", "Hourglass Vessel", "Grand Crucible",
+            "Transmutation Array", "Mercurial Distiller", "Homunculus Matrix", "Elixir of Life", "Magnum Opus Sanctuary",
+            // Pharaoh Tomb (61-70)
             "Gold Pyramid", "Ankh of Life", "Scarab Brooch", "Eye of Horus", "Pharaoh's Gate",
+            "Sphinx Monolith", "Sarcophagus Seal", "Papyrus Columns", "Ra's Solar Bark", "Tomb of Eternity",
+            // Atlantis Deep (71-80)
             "Nautical Anchor", "Starfish Prism", "Nautilus Shell", "Trident Cage", "Poseidon Crown",
+            "Abyssal Geyser", "Coral Citadel", "Kraken's Grasp", "Pearl of Wisdom", "Sunken Throne of Atlantis",
+            // Candy Kingdom (81-90)
             "Lollipop Wheel", "Wafer Lattice", "Candy Pretzel", "Sugar Sandwich", "Gingerbread Keep",
-            "Orbital Ring", "Pulsar Beam", "Hypercube Lattice", "Infinity Coil", "Cosmic Singularity"
+            "Marshmallow Castle", "Gummy Bear Tower", "Caramel Whirlpool", "Peppermint Lattice", "Candy Emperor Fortress",
+            // Cosmic Galaxy (91-100)
+            "Orbital Ring", "Pulsar Beam", "Hypercube Lattice", "Infinity Coil", "Supernova Nexus",
+            "Event Horizon", "Wormhole Matrix", "Dark Matter Web", "Galactic Core", "Cosmic Singularity Master"
         )
 
         val title = titles.getOrElse(level - 1) { "Level $level Challenge" }
@@ -129,7 +151,7 @@ object LevelGenerator {
             screws = screws,
             planks = planks,
             freeHolesCount = freeHolesCount,
-            coinReward = 50 + level * 10
+            coinReward = 15
         )
     }
 
@@ -294,7 +316,7 @@ object LevelGenerator {
         val pine = 0xFFF5DEB3
         val mahogany = 0xFF5D2E17
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // 2 simple crossing planks
                 addBarPlank("plank_1", Point2D(90f, 180f), Point2D(310f, 360f), 0, walnut, listOf(colors[0], colors[1 % colors.size]), holes, screws, planks)
                 addBarPlank("plank_2", Point2D(310f, 180f), Point2D(90f, 360f), 1, oak, listOf(colors[0], colors[1 % colors.size]), holes, screws, planks)
@@ -323,6 +345,9 @@ object LevelGenerator {
                 addBarPlank("rung_3", Point2D(110f, 360f), Point2D(290f, 360f), 1, oak, listOf(colors[0], colors[1 % colors.size]), holes, screws, planks)
             }
         }
+        if (subLevel >= 5) {
+            addBarPlank("workshop_adv_${level}", Point2D(70f, 270f), Point2D(330f, 270f), 3, mahogany, listOf(colors[colors.size - 1], colors[0]), holes, screws, planks)
+        }
     }
 
     private fun buildMandalaLevels(
@@ -342,7 +367,7 @@ object LevelGenerator {
         val c2 = colors[1 % colors.size]
         val c3 = colors[2 % colors.size]
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // Concentric Ring + Cross
                 addRingPlank("mandala_ring", Point2D(200f, 270f), 110f, listOf(0f, 90f, 180f, 270f), 0, purple, listOf(c1, c2, c1, c2), holes, screws, planks)
                 addBarPlank("bar_h", Point2D(90f, 270f), Point2D(310f, 270f), 1, gold, listOf(c3, c3), holes, screws, planks)
@@ -380,6 +405,9 @@ object LevelGenerator {
                 addRingPlank("m_center", Point2D(200f, 270f), 35f, listOf(45f, 225f), 4, gold, listOf(c2, c3), holes, screws, planks, width = 20f)
             }
         }
+        if (subLevel >= 5) {
+            addRingPlank("mandala_adv_${level}", Point2D(200f, 270f), 50f, listOf(0f, 180f), 4, gold, listOf(colors[colors.size - 1], colors[0]), holes, screws, planks)
+        }
     }
 
     private fun buildClockworkLevels(
@@ -400,7 +428,7 @@ object LevelGenerator {
         val c3 = colors[2 % colors.size]
         val c4 = colors[3 % colors.size]
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // Dual Intermeshed Gears
                 addRingPlank("gear_1", Point2D(140f, 240f), 65f, listOf(0f, 90f, 180f, 270f), 0, bronze, listOf(c1, c2, c3, c4), holes, screws, planks)
                 addRingPlank("gear_2", Point2D(260f, 300f), 65f, listOf(45f, 135f, 225f, 315f), 1, copper, listOf(c2, c3, c4, c1), holes, screws, planks)
@@ -435,6 +463,9 @@ object LevelGenerator {
                 addRingPlank("chronos_hub", Point2D(200f, 270f), 35f, listOf(60f, 240f), 4, brass, listOf(c4, c3), holes, screws, planks, width = 20f)
             }
         }
+        if (subLevel >= 5) {
+            addBarPlank("clock_adv_${level}", Point2D(80f, 200f), Point2D(320f, 340f), 3, brass, listOf(colors[colors.size - 1], colors[0]), holes, screws, planks)
+        }
     }
 
     private fun buildZenGardenLevels(
@@ -455,7 +486,7 @@ object LevelGenerator {
         val c3 = colors[2 % colors.size]
         val c4 = colors[3 % colors.size]
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // Bamboo Raft
                 for (i in 0 until 4) {
                     val y = 160f + i * 70f
@@ -515,7 +546,7 @@ object LevelGenerator {
         val c4 = colors[3 % colors.size]
         val c5 = colors[4 % colors.size]
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // Laser Diagonal Grid
                 addBarPlank("laser_1", Point2D(70f, 160f), Point2D(270f, 360f), 0, neonCyan, listOf(c1, c2), holes, screws, planks)
                 addBarPlank("laser_2", Point2D(130f, 160f), Point2D(330f, 360f), 0, neonPink, listOf(c3, c4), holes, screws, planks)
@@ -578,7 +609,7 @@ object LevelGenerator {
         val c4 = colors[3 % colors.size]
         val c5 = colors[4 % colors.size]
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // Potion Flask Contour
                 addBarPlank("flask_neck_L", Point2D(170f, 140f), Point2D(170f, 200f), 0, glassTeal, listOf(c1, c2), holes, screws, planks)
                 addBarPlank("flask_neck_R", Point2D(230f, 140f), Point2D(230f, 200f), 0, glassTeal, listOf(c3, c4), holes, screws, planks)
@@ -635,7 +666,7 @@ object LevelGenerator {
         val c4 = colors[3 % colors.size]
         val c5 = colors[4 % colors.size]
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // Golden Pyramid
                 addBarPlank("pyr_base", Point2D(70f, 390f), Point2D(330f, 390f), 0, pharaohGold, listOf(c1, c2), holes, screws, planks)
                 addBarPlank("pyr_left", Point2D(200f, 140f), Point2D(70f, 390f), 1, lapisBlue, listOf(c2, c3), holes, screws, planks)
@@ -695,7 +726,7 @@ object LevelGenerator {
         val c5 = colors[4 % colors.size]
         val c6 = colors[5 % colors.size]
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // Nautical Anchor
                 addBarPlank("anchor_shank", Point2D(200f, 140f), Point2D(200f, 380f), 0, deepBlue, listOf(c1, c2), holes, screws, planks)
                 addRingPlank("anchor_ring", Point2D(200f, 140f), 35f, listOf(0f, 180f), 1, seaPearl, listOf(c3, c4), holes, screws, planks)
@@ -758,7 +789,7 @@ object LevelGenerator {
         val c5 = colors[4 % colors.size]
         val c6 = colors[5 % colors.size]
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // Lollipop Wheel
                 addRingPlank("lolly_candy", Point2D(200f, 210f), 80f, listOf(0f, 60f, 120f, 180f, 240f, 300f), 0, bubblePink, listOf(c1, c2, c3, c4, c5, c6), holes, screws, planks)
                 addBarPlank("lolly_stick", Point2D(200f, 210f), Point2D(200f, 410f), 1, candyMint, listOf(c2, c5), holes, screws, planks)
@@ -819,7 +850,7 @@ object LevelGenerator {
         val c6 = colors[5 % colors.size]
         val c7 = colors[6 % colors.size]
 
-        when (subLevel) {
+        when (subLevel % 5) {
             0 -> { // Orbital Satellite Ring
                 addRingPlank("orbit_ring", Point2D(200f, 270f), 120f, listOf(0f, 60f, 120f, 180f, 240f, 300f), 0, starlightViolet, listOf(c1, c2, c3, c4, c5, c6), holes, screws, planks)
                 addBarPlank("sat_beam_1", Point2D(80f, 270f), Point2D(320f, 270f), 1, quantumCyan, listOf(c2, c5), holes, screws, planks)

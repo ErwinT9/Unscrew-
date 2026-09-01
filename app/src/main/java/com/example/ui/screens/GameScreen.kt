@@ -110,29 +110,31 @@ fun GameScreen(
                         onScrewTapped = { viewModel.onScrewTapped(it) }
                     )
 
-                    // Floating Combo Banner
+                    // Floating Combo Banner (Top badge, non-obstructive)
                     androidx.compose.animation.AnimatedVisibility(
                         visible = uiState.comboMessage != null,
                         enter = fadeIn() + scaleIn(),
                         exit = fadeOut() + scaleOut(),
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 10.dp)
                     ) {
                         uiState.comboMessage?.let { msg ->
                             Box(
                                 modifier = Modifier
-                                    .shadow(8.dp, RoundedCornerShape(20.dp))
+                                    .shadow(6.dp, RoundedCornerShape(20.dp))
                                     .clip(RoundedCornerShape(20.dp))
                                     .background(
                                         Brush.horizontalGradient(
                                             listOf(Color(0xFFFF6F00), Color(0xFFFFD54F))
                                         )
                                     )
-                                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                                    .padding(horizontal = 16.dp, vertical = 6.dp)
                             ) {
                                 Text(
                                     text = msg,
                                     color = Color.Black,
-                                    fontSize = 18.sp,
+                                    fontSize = 15.sp,
                                     fontWeight = FontWeight.Black
                                 )
                             }
@@ -463,7 +465,7 @@ fun VictoryDialog(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFB300)),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text(text = if (level < 50) "Next Level ➔" else "Victory Complete! 🏆", color = Color.Black, fontWeight = FontWeight.Bold)
+                    Text(text = if (level < 100) "Next Level ➔" else "All 100 Levels Conquered! 🏆", color = Color.Black, fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))

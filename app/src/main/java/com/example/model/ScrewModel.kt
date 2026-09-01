@@ -246,5 +246,130 @@ data class LevelData(
     val freeHolesCount: Int = 3,
     val star3TimeRemaining: Int = 30,
     val star2TimeRemaining: Int = 10,
-    val coinReward: Int = 100
+    val coinReward: Int = 15
 )
+
+data class StoreBundle(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val badge: String,
+    val description: String,
+    val priceUsd: String,
+    val coins: Int,
+    val autoScrewdrivers: Int,
+    val plankBreakers: Int,
+    val drillHoles: Int,
+    val isPopular: Boolean = false
+) {
+    companion object {
+        val DEFAULT_BUNDLES = listOf(
+            StoreBundle(
+                id = "bundle_beginner",
+                title = "Beginner Bundle",
+                subtitle = "Starter Mechanic Kit",
+                badge = "🌱",
+                description = "1,000 Coins + 2 of each essential workshop tool",
+                priceUsd = "$2.99",
+                coins = 1000,
+                autoScrewdrivers = 2,
+                plankBreakers = 2,
+                drillHoles = 2,
+                isPopular = false
+            ),
+            StoreBundle(
+                id = "bundle_master",
+                title = "Master Bundle",
+                subtitle = "Pro Mechanic Kit",
+                badge = "🔧",
+                description = "3,000 Coins + 5 of each advanced workshop tool",
+                priceUsd = "$6.99",
+                coins = 3000,
+                autoScrewdrivers = 5,
+                plankBreakers = 5,
+                drillHoles = 5,
+                isPopular = true
+            ),
+            StoreBundle(
+                id = "bundle_mega",
+                title = "Mega Bundle",
+                subtitle = "Arsenal Superpack",
+                badge = "⚡",
+                description = "8,000 Coins + 12 of each workshop power-up",
+                priceUsd = "$14.99",
+                coins = 8000,
+                autoScrewdrivers = 12,
+                plankBreakers = 12,
+                drillHoles = 12,
+                isPopular = false
+            ),
+            StoreBundle(
+                id = "bundle_ultra",
+                title = "Ultra Bundle",
+                subtitle = "Ultimate Grandmaster Vault",
+                badge = "👑",
+                description = "20,000 Coins + 30 of every tool to conquer all 100 levels",
+                priceUsd = "$29.99",
+                coins = 20000,
+                autoScrewdrivers = 30,
+                plankBreakers = 30,
+                drillHoles = 30,
+                isPopular = false
+            )
+        )
+    }
+}
+
+data class CoinPack(
+    val id: String,
+    val title: String,
+    val coins: Int,
+    val bonusCoins: Int = 0,
+    val priceUsd: String,
+    val bonusLabel: String? = null,
+    val isBestValue: Boolean = false
+) {
+    companion object {
+        val DEFAULT_PACKS = listOf(
+            CoinPack(
+                id = "coins_500",
+                title = "Pouch of Coins",
+                coins = 500,
+                priceUsd = "$1.99"
+            ),
+            CoinPack(
+                id = "coins_1500",
+                title = "Bag of Coins",
+                coins = 1500,
+                bonusCoins = 150,
+                priceUsd = "$4.99",
+                bonusLabel = "+10% BONUS"
+            ),
+            CoinPack(
+                id = "coins_4000",
+                title = "Chest of Coins",
+                coins = 4000,
+                bonusCoins = 600,
+                priceUsd = "$9.99",
+                bonusLabel = "POPULAR"
+            ),
+            CoinPack(
+                id = "coins_8500",
+                title = "Vault of Coins",
+                coins = 8500,
+                bonusCoins = 1500,
+                priceUsd = "$19.99",
+                bonusLabel = "+20% BONUS"
+            ),
+            CoinPack(
+                id = "coins_15000",
+                title = "Grand Treasury",
+                coins = 15000,
+                bonusCoins = 4000,
+                priceUsd = "$49.99",
+                bonusLabel = "BEST VALUE",
+                isBestValue = true
+            )
+        )
+    }
+}

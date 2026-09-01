@@ -415,10 +415,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 else -> 1
             }
 
-            val earnedCoins = levelData.coinReward + (stars * 20) + (timeBonus * 2)
+            val earnedCoins = 15
             prefs.addCoins(earnedCoins)
             prefs.setStarsForLevel(lvl, stars)
-            if (lvl < 50) {
+            if (lvl < 100) {
                 prefs.setUnlockedLevel(lvl + 1)
             }
 
@@ -617,7 +617,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun nextLevel() {
-        val next = (_uiState.value.currentLevel + 1).coerceAtMost(50)
+        val next = (_uiState.value.currentLevel + 1).coerceAtMost(100)
         loadLevel(next)
     }
 
@@ -651,12 +651,36 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun canClaimDailyReward(): Boolean = prefs.canClaimDaily()
+
     fun claimDailyReward(): Boolean {
-        prefs.addCoins(100)
-        soundManager.playBoxMatch()
-        hapticManager.medium()
+        if (!prefs.canClaimDaily()) {
+            soundManager.playClick()
+            hapticManager.tick()
+            showBanner("Daily supply already claimed today! Check back tomorrow.")
+            return false
+        }
+        prefs.markDailyClaimed()
+        prefs.addCoins(150)
+        prefs.addTool(ToolType.AUTO_SCREW, 1)
+        soundManager.playVictory()
+        hapticManager.heavy()
         refreshMetaState()
-        showBanner("Claimed +100 Daily 🪙!")
+        showBanner("Claimed Daily Workshop Supply: +150 🪙 and +1 Auto Screwdriver!")
         return true
+    }
+
+    fun purchaseBundle(bundle: StoreBundle): Boolean {
+        soundManager.playClick()
+        hapticManager.medium()
+        showBanner("${bundle.title} (${bundle.priceUsd}): Amazon IAP integration in progress. Purchases will be enabled soon!")
+        return false
+    }
+
+    fun purchaseCoinPack(pack: CoinPack): Boolean {
+        soundManager.playClick()
+        hapticManager.medium()
+        showBanner("${pack.title} (${pack.priceUsd}): Amazon IAP integration in progress. Purchases will be enabled soon!")
+        return false
     }
 }

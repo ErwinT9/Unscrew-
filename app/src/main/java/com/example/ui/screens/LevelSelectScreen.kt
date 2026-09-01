@@ -5,11 +5,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.model.BiomeTheme
-import com.example.model.LevelGenerator
 import com.example.viewmodel.GameViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,21 +49,25 @@ fun LevelSelectScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Level Journey (50 Levels)",
+                            text = "Level Journey (100 Levels)",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
                             color = Color(0xFFFFD54F)
                         )
                         Text(
-                            text = "10 Mechanical Worlds",
-                            fontSize = 12.sp,
+                            text = "10 Mechanical Biomes • 10 Levels Each",
+                            fontSize = 11.sp,
                             color = Color(0xFFD7CCC8)
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
                     }
                 },
                 actions = {
@@ -79,7 +83,7 @@ fun LevelSelectScreen(
                         Text(text = "⭐", fontSize = 13.sp)
                         Spacer(modifier = Modifier.width(3.dp))
                         Text(
-                            text = "$totalStars/150",
+                            text = "$totalStars/300",
                             color = Color(0xFFFFD54F),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
@@ -107,12 +111,12 @@ fun LevelSelectScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             biomes.forEachIndexed { biomeIdx, biome ->
-                val startLevel = biomeIdx * 5 + 1
-                val endLevel = startLevel + 4
+                val startLevel = biomeIdx * 10 + 1
+                val endLevel = startLevel + 9
 
                 item {
                     BiomeChapterCard(
@@ -170,7 +174,7 @@ fun BiomeChapterCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(14.dp)
         ) {
             // Biome Header Row
             Row(
@@ -179,7 +183,7 @@ fun BiomeChapterCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = biome.iconName, fontSize = 24.sp)
+                    Text(text = biome.iconName, fontSize = 22.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
@@ -196,22 +200,53 @@ fun BiomeChapterCard(
                     }
                 }
 
-                Text(
-                    text = "Lv $startLevel - $endLevel",
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color.Black.copy(alpha = 0.4f)
+                ) {
+                    Text(
+                        text = "Lv $startLevel - $endLevel",
+                        color = Color.White.copy(alpha = 0.85f),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // 5 Levels Grid Row
+            // First Row of 5 Levels
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                for (lvl in startLevel..endLevel) {
+                for (lvl in startLevel until startLevel + 5) {
+                    val isLvlUnlocked = unlockedLevel >= lvl
+                    val stars = getStars(lvl)
+
+                    LevelNodeButton(
+                        levelNumber = lvl,
+                        isUnlocked = isLvlUnlocked,
+                        stars = stars,
+                        accentColor = Color(biome.accentColor),
+                        onClick = {
+                            if (isLvlUnlocked) {
+                                onSelectLevel(lvl)
+                            }
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Second Row of 5 Levels
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                for (lvl in (startLevel + 5)..endLevel) {
                     val isLvlUnlocked = unlockedLevel >= lvl
                     val stars = getStars(lvl)
 
@@ -246,7 +281,7 @@ fun LevelNodeButton(
     ) {
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(44.dp)
                 .shadow(if (isUnlocked) 4.dp else 1.dp, CircleShape)
                 .clip(CircleShape)
                 .background(
@@ -261,7 +296,7 @@ fun LevelNodeButton(
                     }
                 )
                 .border(
-                    width = 2.dp,
+                    width = 1.5.dp,
                     color = if (isUnlocked) Color.White.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.15f),
                     shape = CircleShape
                 ),
@@ -271,7 +306,7 @@ fun LevelNodeButton(
                 Text(
                     text = "$levelNumber",
                     color = Color.White,
-                    fontSize = 15.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Black
                 )
             } else {
@@ -279,12 +314,12 @@ fun LevelNodeButton(
                     imageVector = Icons.Default.Lock,
                     contentDescription = "Locked",
                     tint = Color.White.copy(alpha = 0.4f),
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         // Stars mini row
         if (isUnlocked) {
@@ -292,12 +327,12 @@ fun LevelNodeButton(
                 for (s in 1..3) {
                     Text(
                         text = if (s <= stars) "⭐" else "·",
-                        fontSize = 10.sp
+                        fontSize = 8.sp
                     )
                 }
             }
         } else {
-            Text(text = "·", fontSize = 10.sp, color = Color.White.copy(alpha = 0.3f))
+            Text(text = "·", fontSize = 8.sp, color = Color.White.copy(alpha = 0.3f))
         }
     }
 }
